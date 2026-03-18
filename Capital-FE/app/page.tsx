@@ -36,6 +36,13 @@ export default function Home() {
       }
 
       setMessage(data.message);
+      
+      // Store organization info in localStorage for dynamic access
+      if (data.organization && data.organization.id) {
+        localStorage.setItem("organizationId", data.organization.id);
+        localStorage.setItem("organizationName", data.organization.name);
+      }
+      
       console.log("Logged in:", data.organization);
       window.location.href = "/dashboard";
     } catch (err: any) {

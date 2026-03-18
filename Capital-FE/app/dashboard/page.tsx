@@ -11,11 +11,13 @@ import {
   TrendingUp,
   Loader2
 } from "lucide-react";
+import Link from "next/link";
 
 interface Metrics {
   totalReceivables: number;
   totalPayables: number;
   workingCapital: number;
+  cashOnHand: number;
 }
 
 export default function DashboardPage() {
@@ -26,14 +28,16 @@ export default function DashboardPage() {
     const fetchMetrics = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const companyId = process.env.NEXT_PUBLIC_DEMO_COMPANY_ID;
+        // Dynamically get organizationId from localStorage (stored during login)
+        const organizationId = localStorage.getItem("organizationId");
 
-        if (!apiUrl || !companyId) {
-           console.error("Missing API configuration");
+        if (!apiUrl || !organizationId) {
+           console.error("Missing API configuration or Session");
+           setLoading(false);
            return;
         }
 
-        const response = await fetch(`${apiUrl}/dashboard/metrics?company_id=${companyId}`);
+        const response = await fetch(`${apiUrl}/dashboard/metrics?company_id=${organizationId}`);
         const data = await response.json();
         setMetrics(data);
       } catch (error) {
@@ -67,13 +71,15 @@ export default function DashboardPage() {
       label: "Total Receivables", 
       value: metrics ? formatCurrency(metrics.totalReceivables) : "₹0", 
       iconColor: "text-primary", 
-      icon: <ArrowDownLeft className="w-4 h-4" /> 
+      icon: <ArrowDownLeft className="w-4 h-4" />,
+      href: "/dashboard/receivables"
     },
     { 
       label: "Total Payables", 
       value: metrics ? formatCurrency(metrics.totalPayables) : "₹0", 
       iconColor: "text-error", 
-      icon: <ArrowUpRight className="w-4 h-4" /> 
+      icon: <ArrowUpRight className="w-4 h-4" />,
+      href: "/dashboard/payables"
     },
     { 
       label: "Working Capital", 
@@ -81,30 +87,34 @@ export default function DashboardPage() {
       iconColor: "text-accent", 
       icon: <Wallet className="w-4 h-4" /> 
     },
-    { 
-      label: "Cash on Hand", 
-      value: "₹52,000", 
-      iconColor: "text-primary", 
-      icon: <Banknote className="w-4 h-4" /> 
-    },
   ];
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => (
-          <div key={stat.label} className="card-surface p-6 space-y-2">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-foreground/40">{stat.label}</p>
-              <div className={`p-2 rounded-sm bg-background border border-border ${stat.iconColor}`}>
-                {stat.icon}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {stats.map((stat) => {
+          const content = (
+            <div className={`card-surface p-6 space-y-2 h-full ${stat.href ? 'hover:border-primary/50 cursor-pointer transition-colors' : ''}`}>
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-foreground/40">{stat.label}</p>
+                <div className={`p-2 rounded-sm bg-background border border-border ${stat.iconColor}`}>
+                  {stat.icon}
+                </div>
+              </div>
+              <div className="flex items-end justify-between">
+                <h3 className="text-2xl font-bold text-foreground">{stat.value}</h3>
               </div>
             </div>
-            <div className="flex items-end justify-between">
-              <h3 className="text-2xl font-bold text-foreground">{stat.value}</h3>
-            </div>
-          </div>
-        ))}
+          );
+
+          return stat.href ? (
+            <Link key={stat.label} href={stat.href}>
+              {content}
+            </Link>
+          ) : (
+            <div key={stat.label}>{content}</div>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
