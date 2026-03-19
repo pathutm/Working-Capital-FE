@@ -1,28 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  ArrowUpRight, 
-  ArrowDownLeft, 
-  Wallet, 
+import {
+  ArrowUpRight,
+  ArrowDownLeft,
+  Wallet,
   Banknote,
   Clock,
   CheckCircle2,
   TrendingUp,
   Loader2,
-  DollarSign, 
+  DollarSign,
   AlertCircle,
   BarChart as BarChartIcon
 } from "lucide-react";
 import Link from "next/link";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
   Legend,
   Cell
 } from 'recharts';
@@ -89,9 +89,9 @@ export default function DashboardPage() {
         const organizationId = localStorage.getItem("organizationId");
 
         if (!apiUrl || !organizationId) {
-           console.error("Missing API configuration or Session");
-           setLoading(false);
-           return;
+          console.error("Missing API configuration or Session");
+          setLoading(false);
+          return;
         }
 
         const response = await fetch(`${apiUrl}/dashboard/metrics?company_id=${organizationId}`);
@@ -124,25 +124,25 @@ export default function DashboardPage() {
   }
 
   const stats = [
-    { 
-      label: "Total Receivables", 
-      value: metrics ? formatCurrency(metrics.totalReceivables) : "₹0", 
-      iconColor: "text-primary", 
+    {
+      label: "Total Receivables",
+      value: metrics ? formatCurrency(metrics.totalReceivables) : "₹0",
+      iconColor: "text-primary",
       icon: <ArrowDownLeft className="w-4 h-4" />,
       href: "/dashboard/receivables"
     },
-    { 
-      label: "Total Payables", 
-      value: metrics ? formatCurrency(metrics.totalPayables) : "₹0", 
-      iconColor: "text-error", 
+    {
+      label: "Total Payables",
+      value: metrics ? formatCurrency(metrics.totalPayables) : "₹0",
+      iconColor: "text-error",
       icon: <ArrowUpRight className="w-4 h-4" />,
       href: "/dashboard/payables"
     },
-    { 
-      label: "Working Capital", 
-      value: metrics ? formatCurrency(metrics.netWorkingCapital) : "₹0", 
-      iconColor: "text-accent", 
-      icon: <Wallet className="w-4 h-4" /> 
+    {
+      label: "Working Capital",
+      value: metrics ? formatCurrency(metrics.netWorkingCapital) : "₹0",
+      iconColor: "text-accent",
+      icon: <Wallet className="w-4 h-4" />
     },
   ];
 
@@ -183,7 +183,7 @@ export default function DashboardPage() {
               <p className="text-[10px] text-foreground/40 font-bold uppercase tracking-tight">Financial Inflow vs Outflow</p>
             </div>
             <div className="flex items-center space-x-4">
-              <select 
+              <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
                 className="bg-background border border-border text-[10px] font-bold uppercase px-2 py-1 rounded-sm focus:outline-none focus:border-primary transition-colors cursor-pointer"
@@ -196,23 +196,23 @@ export default function DashboardPage() {
               <div className="h-4 w-px bg-border mx-1"></div>
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-1.5">
-                    <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.4)]"></div>
-                    <span className="text-[10px] font-bold text-foreground/60 uppercase tracking-tighter">Sales</span>
+                  <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.4)]"></div>
+                  <span className="text-[10px] font-bold text-foreground/60 uppercase tracking-tighter">Sales</span>
                 </div>
                 <div className="flex items-center space-x-1.5">
-                    <div className="w-2 h-2 rounded-full bg-error shadow-[0_0_8px_rgba(var(--error-rgb),0.4)]"></div>
-                    <span className="text-[10px] font-bold text-foreground/60 uppercase tracking-tighter">Purchases</span>
+                  <div className="w-2 h-2 rounded-full bg-error shadow-[0_0_8px_rgba(var(--error-rgb),0.4)]"></div>
+                  <span className="text-[10px] font-bold text-foreground/60 uppercase tracking-tighter">Purchases</span>
                 </div>
               </div>
             </div>
           </div>
-          
+
           <div className="flex-1 w-full min-h-[320px]">
             {metrics?.monthlyInvoiceData && metrics.monthlyInvoiceData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={selectedYear === "All" 
-                    ? metrics.monthlyInvoiceData 
+                  data={selectedYear === "All"
+                    ? metrics.monthlyInvoiceData
                     : metrics.monthlyInvoiceData.filter(d => d.name.endsWith(selectedYear))
                   }
                   margin={{ top: 0, right: 0, left: -20, bottom: 0 }}
@@ -220,46 +220,46 @@ export default function DashboardPage() {
                 >
                   <defs>
                     <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--primary)" stopOpacity={1}/>
-                      <stop offset="100%" stopColor="var(--primary)" stopOpacity={0.6}/>
+                      <stop offset="0%" stopColor="var(--primary)" stopOpacity={1} />
+                      <stop offset="100%" stopColor="var(--primary)" stopOpacity={0.6} />
                     </linearGradient>
                     <linearGradient id="purchaseGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--error)" stopOpacity={1}/>
-                      <stop offset="100%" stopColor="var(--error)" stopOpacity={0.6}/>
+                      <stop offset="0%" stopColor="var(--error)" stopOpacity={1} />
+                      <stop offset="100%" stopColor="var(--error)" stopOpacity={0.6} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
-                  <XAxis 
-                    dataKey="name" 
+                  <XAxis
+                    dataKey="name"
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 9, fontWeight: 700 }}
                     dy={12}
                     tickFormatter={(value) => value.split(' ')[0]} // Show only month name on axis if year filtered? No, keep it clean.
                   />
-                  <YAxis 
+                  <YAxis
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 9, fontWeight: 700 }}
                     tickFormatter={(value) => value === 0 ? '0' : `₹${(value / 1000).toFixed(0)}k`}
                   />
-                  <Tooltip 
+                  <Tooltip
                     cursor={{ fill: 'rgba(255,255,255,0.02)' }}
                     content={<CustomTooltip formatCurrency={formatCurrency} />}
                   />
-                  <Bar 
+                  <Bar
                     name="sales"
-                    dataKey="sales" 
-                    fill="url(#salesGradient)" 
-                    radius={[2, 2, 0, 0]} 
+                    dataKey="sales"
+                    fill="url(#salesGradient)"
+                    radius={[2, 2, 0, 0]}
                     barSize={selectedYear === "All" ? 20 : 40}
                     animationDuration={1500}
                   />
-                  <Bar 
+                  <Bar
                     name="purchases"
-                    dataKey="purchases" 
-                    fill="url(#purchaseGradient)" 
-                    radius={[2, 2, 0, 0]} 
+                    dataKey="purchases"
+                    fill="url(#purchaseGradient)"
+                    radius={[2, 2, 0, 0]}
                     barSize={selectedYear === "All" ? 20 : 40}
                     animationDuration={1500}
                   />

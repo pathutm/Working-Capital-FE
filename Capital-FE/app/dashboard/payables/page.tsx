@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { 
+import {
   ArrowLeft,
   ArrowUpRight,
   Search,
@@ -57,7 +57,7 @@ interface Invoice {
 function PayablesContent() {
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get('search') || "";
-  
+
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -69,7 +69,7 @@ function PayablesContent() {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         const organizationId = localStorage.getItem("organizationId");
-        
+
         if (!apiUrl || !organizationId) return;
 
         const response = await fetch(`${apiUrl}/dashboard/payables?company_id=${organizationId}`);
@@ -104,8 +104,8 @@ function PayablesContent() {
   };
 
   const filteredInvoices = (invoices || []).filter(inv => {
-    const matchesSearch = inv.invoice_no.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          inv.vendor.company_name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = inv.invoice_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      inv.vendor.company_name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = activeFilter === "All" || inv.status === activeFilter;
     return matchesSearch && matchesFilter;
   });
@@ -182,7 +182,7 @@ function PayablesContent() {
         </div>
         <div className="card-surface p-6 space-y-2 border-l-4 border-l-warning">
           <p className="text-sm font-medium text-foreground/40">Pending Approval</p>
-          <h3 className="text-2xl font-bold text-warning">{formatCurrency((invoices || []).filter(i => i.status === 'Pending').reduce((acc, i) => acc + Number(i.total_amount), 0))}</h3>
+          <h3 className="text-2xl font-bold text-warning">{formatCurrency((invoices || []).filter(i => i.status === 'Pending').reduce((acc, i) => acc + (Number(i.total_amount) - Number(i.paid_amount)), 0))}</h3>
           <p className="text-xs text-warning/60 flex items-center">
             <AlertCircle className="w-3 h-3 mr-1" />
             {(invoices || []).filter(i => i.status === 'Pending').length} bills awaiting review
@@ -195,9 +195,9 @@ function PayablesContent() {
         <div className="p-4 border-b border-border flex items-center justify-between bg-background/50">
           <div className="relative w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/20" />
-            <input 
-              type="text" 
-              placeholder="Search by invoice # or vendor..." 
+            <input
+              type="text"
+              placeholder="Search by invoice # or vendor..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-sm text-sm focus:outline-none focus:border-primary transition-colors"
@@ -205,14 +205,13 @@ function PayablesContent() {
           </div>
           <div className="flex items-center space-x-2">
             {['All', 'Paid', 'Pending', 'Overdue'].map((status) => (
-              <button 
+              <button
                 key={status}
                 onClick={() => setActiveFilter(status)}
-                className={`px-3 py-2 border rounded-sm text-xs transition-colors ${
-                  activeFilter === status 
-                  ? 'bg-primary text-primary-foreground border-primary' 
-                  : 'border-border text-foreground/60 hover:bg-background'
-                }`}
+                className={`px-3 py-2 border rounded-sm text-xs transition-colors ${activeFilter === status
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'border-border text-foreground/60 hover:bg-background'
+                  }`}
               >
                 {status}
               </button>
@@ -261,15 +260,15 @@ function PayablesContent() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end space-x-2">
-                        <button 
-                            onClick={() => setSelectedInvoice(invoice)}
-                            className="p-2 hover:bg-background rounded-sm text-foreground/20 hover:text-primary transition-all"
-                        >
-                            <Eye className="w-4 h-4" />
-                        </button>
-                        <button className="p-2 hover:bg-background rounded-sm text-foreground/20 hover:text-foreground transition-all">
-                            <MoreVertical className="w-4 h-4" />
-                        </button>
+                      <button
+                        onClick={() => setSelectedInvoice(invoice)}
+                        className="p-2 hover:bg-background rounded-sm text-foreground/20 hover:text-primary transition-all"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button className="p-2 hover:bg-background rounded-sm text-foreground/20 hover:text-foreground transition-all">
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -280,10 +279,10 @@ function PayablesContent() {
       </div>
 
       {selectedInvoice && (
-        <InvoiceDetailModal 
-            type="payables"
-            invoice={selectedInvoice}
-            onClose={() => setSelectedInvoice(null)}
+        <InvoiceDetailModal
+          type="payables"
+          invoice={selectedInvoice}
+          onClose={() => setSelectedInvoice(null)}
         />
       )}
     </div>
