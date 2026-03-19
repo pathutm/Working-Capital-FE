@@ -36,13 +36,13 @@ export default function Home() {
       }
 
       setMessage(data.message);
-      
+
       // Store organization info in localStorage for dynamic access
       if (data.organization && data.organization.id) {
         localStorage.setItem("organizationId", data.organization.id);
         localStorage.setItem("organizationName", data.organization.name);
       }
-      
+
       console.log("Logged in:", data.organization);
       window.location.href = "/dashboard";
     } catch (err: any) {
@@ -56,7 +56,7 @@ export default function Home() {
     <div className="flex min-h-screen items-center justify-center p-6 bg-background">
       <div className="card-surface w-full max-w-md p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="text-center space-y-2">
-          <h1 className="text-4xl text-primary font-bold tracking-tight">CapFlow</h1>
+          <h1 className="text-4xl text-primary font-bold tracking-tight">SNS</h1>
           <p className="text-foreground/60">Working Capital</p>
         </div>
 
@@ -111,7 +111,7 @@ export default function Home() {
         </div>
 
         <div className="text-center text-xs text-foreground/40 pt-4">
-          By signing in, you agree to CapFlow's Terms of Service and Privacy Policy.
+          By signing in, you agree to SNS's Terms of Service and Privacy Policy.
         </div>
       </div>
     </div>

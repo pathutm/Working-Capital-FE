@@ -9,7 +9,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "CapFlow",
+  title: "SNS",
   description: "Working Capital",
 };
 
