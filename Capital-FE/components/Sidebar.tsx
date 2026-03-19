@@ -69,7 +69,7 @@ const Sidebar = () => {
 
   return (
     <>
-      <aside className="w-64 min-h-screen bg-card border-r border-border flex flex-col pt-6">
+      <aside className="w-64 h-full bg-card border-r border-border flex flex-col pt-6 overflow-hidden">
         <div className="px-6 mb-8 flex items-center space-x-3">
           <div className="w-10 h-10 bg-primary rounded-md flex items-center justify-center shadow-lg shadow-primary/20">
             <Waves className="w-6 h-6 text-white" />
@@ -80,7 +80,7 @@ const Sidebar = () => {
           </div>
         </div>
 
-        <nav className="flex-1 space-y-6 px-4">
+        <nav className="flex-1 space-y-6 px-4 overflow-y-auto custom-scrollbar">
           {menuGroups.map((group) => (
             <div key={group.title} className="space-y-2">
               <div className="flex items-center space-x-2 px-2 text-xs font-semibold text-foreground/40 uppercase tracking-wider">

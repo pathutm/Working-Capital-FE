@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { 
   ArrowLeft,
   ArrowUpRight,
@@ -53,11 +54,14 @@ interface Invoice {
   items: InvoiceItem[];
 }
 
-export default function PayablesPage() {
+function PayablesContent() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get('search') || "";
+  
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [activeFilter, setActiveFilter] = useState("All");
 
   useEffect(() => {
@@ -114,6 +118,33 @@ export default function PayablesPage() {
     );
   }
 
+  const handleExport = () => {
+    const headers = ["Bill No", "Date", "Vendor", "Vendor ID", "Amount", "Paid", "Status", "Due Date"];
+    const csvContent = [
+      headers.join(","),
+      ...(invoices || []).map(inv => [
+        `#${inv.invoice_no}`,
+        new Date(inv.invoice_date).toLocaleDateString('en-IN'),
+        `"${inv.vendor.company_name.replace(/"/g, '""')}"`,
+        inv.vendor.vendor_id,
+        inv.total_amount,
+        inv.paid_amount,
+        inv.status,
+        inv.due_date ? new Date(inv.due_date).toLocaleDateString('en-IN') : 'N/A'
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Payables_Report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const totalOutstanding = (invoices || []).reduce((acc, inv) => acc + (Number(inv.total_amount) - Number(inv.paid_amount)), 0);
 
   return (
@@ -130,8 +161,7 @@ export default function PayablesPage() {
           </div>
         </div>
         <div className="flex items-center space-x-3">
-          <button className="btn-secondary">Export Report</button>
-          <button className="btn-primary">Record Payment</button>
+          <button onClick={handleExport} className="btn-secondary">Export Report</button>
         </div>
       </div>
 
@@ -257,5 +287,17 @@ export default function PayablesPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function PayablesPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-[60vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    }>
+      <PayablesContent />
+    </Suspense>
   );
 }

@@ -33,6 +33,11 @@ interface Invoice {
   paid_amount: number;
   status: string;
   due_date: string | null;
+  payment_terms_days: number | null;
+  po_reference: string | null;
+  po_number: string | null;
+  grn_number: string | null;
+  tds_deducted: number | null;
   items: InvoiceItem[];
   customer?: any;
   vendor?: any;
@@ -74,6 +79,32 @@ export default function AllInvoicesPage() {
     }).format(amount);
   };
 
+  const handleExport = () => {
+    const headers = ["Type", "Invoice No", "Entity", "Amount", "Paid", "Status", "Date"];
+    const csvContent = [
+      headers.join(","),
+      ...filteredInvoices.map(inv => [
+        inv.invoice_type,
+        `#${inv.invoice_no}`,
+        `"${inv.entity_name.replace(/"/g, '""')}"`,
+        inv.total_amount,
+        inv.paid_amount,
+        inv.status,
+        new Date(inv.invoice_date).toLocaleDateString('en-IN')
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `All_Invoices_Report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const filteredInvoices = invoices.filter(inv => {
     const matchesSearch = inv.invoice_no.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           inv.entity_name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -101,6 +132,9 @@ export default function AllInvoicesPage() {
             <h1 className="text-2xl font-bold text-foreground">All Invoices</h1>
             <p className="text-sm text-foreground/40">Consolidated view of Sales and Purchase records</p>
           </div>
+        </div>
+        <div className="flex items-center space-x-3">
+          <button onClick={handleExport} className="btn-secondary">Export Report</button>
         </div>
       </div>
 

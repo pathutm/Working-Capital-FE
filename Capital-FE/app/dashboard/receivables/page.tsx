@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { 
   ArrowLeft,
   ArrowDownLeft,
@@ -51,11 +52,14 @@ interface Invoice {
   items: InvoiceItem[];
 }
 
-export default function ReceivablesPage() {
+function ReceivablesContent() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get('search') || "";
+  
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [activeFilter, setActiveFilter] = useState("All");
 
   useEffect(() => {
@@ -112,6 +116,33 @@ export default function ReceivablesPage() {
     );
   }
 
+  const handleExport = () => {
+    const headers = ["Invoice No", "Date", "Customer", "Customer ID", "Amount", "Paid", "Status", "Due Date"];
+    const csvContent = [
+      headers.join(","),
+      ...(invoices || []).map(inv => [
+        `#${inv.invoice_no}`,
+        new Date(inv.invoice_date).toLocaleDateString('en-IN'),
+        `"${inv.customer.company_name.replace(/"/g, '""')}"`,
+        inv.customer.customer_id,
+        inv.total_amount,
+        inv.paid_amount,
+        inv.status,
+        inv.due_date ? new Date(inv.due_date).toLocaleDateString('en-IN') : 'N/A'
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Receivables_Report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const totalOutstanding = invoices.reduce((acc, inv) => acc + (Number(inv.total_amount) - Number(inv.paid_amount)), 0);
 
   return (
@@ -128,8 +159,7 @@ export default function ReceivablesPage() {
           </div>
         </div>
         <div className="flex items-center space-x-3">
-          <button className="btn-secondary">Export Report</button>
-          <button className="btn-primary">New Invoice</button>
+          <button onClick={handleExport} className="btn-secondary">Export Report</button>
         </div>
       </div>
 
@@ -145,7 +175,7 @@ export default function ReceivablesPage() {
         </div>
         <div className="card-surface p-6 space-y-2">
           <p className="text-sm font-medium text-foreground/40">Total Invoices</p>
-          <h3 className="text-2xl font-bold text-foreground">{(invoices || []).length}</h3>
+          <h3 className="text-2xl font-bold">{(invoices || []).length}</h3>
           <p className="text-xs text-foreground/40">Across {new Set((invoices || []).map(i => i.customer?.customer_id)).size} customers</p>
         </div>
         <div className="card-surface p-6 space-y-2 border-l-4 border-l-error">
@@ -255,5 +285,17 @@ export default function ReceivablesPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function ReceivablesPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-[60vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    }>
+      <ReceivablesContent />
+    </Suspense>
   );
 }
